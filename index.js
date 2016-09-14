@@ -120,6 +120,9 @@ function test(example, value) {
   }
 
   if (typeof example === 'object' && example !== null) {
+    if (typeof value === 'undefined') {
+      return false;
+    }
     // ignore geo near filter
     if (example.near) {
       return true;
