@@ -87,28 +87,30 @@ function toRegExp(pattern) {
   // https://developer.mozilla.org
   // /en-US/docs/Web/JavaScript/Guide/Regular_Expressions
   // #Writing_a_Regular_Expression_Pattern
-  pattern = pattern.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, '\\$1');
-  for (var i = 0, n = pattern.length; i < n; i++) {
-    var char = pattern.charAt(i);
-    if (char === '\\') {
-      i++; // Skip to next char
-      if (i < n) {
-        regex += pattern.charAt(i);
-      }
-      continue;
-    } else if (char === '%') {
-      regex += '.*';
-    } else if (char === '_') {
-      regex += '.';
-    } else if (char === '.') {
-      regex += '\\.';
-    } else if (char === '*') {
-      regex += '\\*';
-    } else {
-      regex += char;
-    }
-  }
-  return regex;
+  // pattern = pattern.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, '\\$1');
+  pattern = pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  // for (var i = 0, n = pattern.length; i < n; i++) {
+  //   var char = pattern.charAt(i);
+  //   if (char === '\\') {
+  //     i++; // Skip to next char
+  //     if (i < n) {
+  //       regex += pattern.charAt(i);
+  //     }
+  //     continue;
+  //   } else if (char === '%') {
+  //     regex += '.*';
+  //   } else if (char === '_') {
+  //     regex += '.';
+  //   } else if (char === '.') {
+  //     regex += '\\.';
+  //   } else if (char === '*') {
+  //     regex += '\\*';
+  //   } else {
+  //     regex += char;
+  //   }
+  // }
+  return '/' + pattern + '/g';
+  // return regex;
 }
 
 function test(example, value) {
