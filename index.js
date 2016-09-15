@@ -109,11 +109,13 @@ function toRegExp(pattern) {
   //     regex += char;
   //   }
   // }
-  return '/' + pattern + '/g';
+  return pattern;
+  // return '/' + pattern + '/g';
   // return regex;
 }
 
 function test(example, value) {
+	console.log('TEST', example, value);
   if (typeof value === 'string' && (example instanceof RegExp)) {
     return value.match(example);
   }
@@ -155,6 +157,7 @@ function test(example, value) {
         like = toRegExp(like);
       }
       if (example.like) {
+      	console.log('LIKE', like, value, !!new RegExp(like).test(value));
         return !!new RegExp(like).test(value);
       }
 
