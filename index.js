@@ -5,6 +5,7 @@
 
 var debug = require('debug')('loopback:filter');
 var geo = require('./lib/geo');
+var remove = require('diacritics').remove;
 
 module.exports = function filterNodes(nodes, filter) {
   if (filter) {
@@ -87,28 +88,31 @@ function toRegExp(pattern) {
   // https://developer.mozilla.org
   // /en-US/docs/Web/JavaScript/Guide/Regular_Expressions
   // #Writing_a_Regular_Expression_Pattern
-  pattern = pattern.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, '\\$1');
-  for (var i = 0, n = pattern.length; i < n; i++) {
-    var char = pattern.charAt(i);
-    if (char === '\\') {
-      i++; // Skip to next char
-      if (i < n) {
-        regex += pattern.charAt(i);
-      }
-      continue;
-    } else if (char === '%') {
-      regex += '.*';
-    } else if (char === '_') {
-      regex += '.';
-    } else if (char === '.') {
-      regex += '\\.';
-    } else if (char === '*') {
-      regex += '\\*';
-    } else {
-      regex += char;
-    }
-  }
-  return regex;
+  // pattern = pattern.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, '\\$1');
+  pattern = pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  // for (var i = 0, n = pattern.length; i < n; i++) {
+  //   var char = pattern.charAt(i);
+  //   if (char === '\\') {
+  //     i++; // Skip to next char
+  //     if (i < n) {
+  //       regex += pattern.charAt(i);
+  //     }
+  //     continue;
+  //   } else if (char === '%') {
+  //     regex += '.*';
+  //   } else if (char === '_') {
+  //     regex += '.';
+  //   } else if (char === '.') {
+  //     regex += '\\.';
+  //   } else if (char === '*') {
+  //     regex += '\\*';
+  //   } else {
+  //     regex += char;
+  //   }
+  // }
+  return pattern;
+  // return '/' + pattern + '/g';
+  // return regex;
 }
 
 function test(example, value) {
@@ -120,6 +124,9 @@ function test(example, value) {
   }
 
   if (typeof example === 'object' && example !== null) {
+    if (typeof value === 'undefined') {
+      return false;
+    }
     // ignore geo near filter
     if (example.near) {
       return true;
@@ -154,6 +161,22 @@ function test(example, value) {
       }
 
       if (example.nlike) {
+        return !new RegExp(like).test(value);
+      }
+    }
+
+    if (example.ilike || example.nilike) {
+      var like = example.ilike || example.nilike;
+      value = remove(value).toLowerCase();
+      if (typeof like === 'string') {
+        like = remove(like).toLowerCase();
+        like = toRegExp(like);
+      }
+      if (example.ilike) {
+        return !!new RegExp(like).test(value);
+      }
+
+      if (example.nilike) {
         return !new RegExp(like).test(value);
       }
     }
@@ -275,7 +298,6 @@ function normalizeOrder(filter) {
 
   orders.forEach(function(key, i) {
     var reverse = 1;
-    console.log(key);
     var m = key.match(/\s+(A|DE)SC$/i);
     if (m) {
       key = key.replace(/\s+(A|DE)SC/i, '');
