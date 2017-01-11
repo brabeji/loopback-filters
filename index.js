@@ -5,6 +5,7 @@
 
 var debug = require('debug')('loopback:filter');
 var geo = require('./lib/geo');
+var remove = require('diacritics').remove;
 
 module.exports = function filterNodes(nodes, filter) {
   if (filter) {
@@ -115,7 +116,6 @@ function toRegExp(pattern) {
 }
 
 function test(example, value) {
-	console.log('TEST', example, value);
   if (typeof value === 'string' && (example instanceof RegExp)) {
     return value.match(example);
   }
@@ -157,11 +157,26 @@ function test(example, value) {
         like = toRegExp(like);
       }
       if (example.like) {
-      	console.log('LIKE', like, value, !!new RegExp(like).test(value));
         return !!new RegExp(like).test(value);
       }
 
       if (example.nlike) {
+        return !new RegExp(like).test(value);
+      }
+    }
+
+    if (example.ilike || example.nilike) {
+      var like = example.ilike || example.nilike;
+      value = remove(value).toLowerCase();
+      if (typeof like === 'string') {
+        like = remove(like).toLowerCase();
+        like = toRegExp(like);
+      }
+      if (example.ilike) {
+        return !!new RegExp(like).test(value);
+      }
+
+      if (example.nilike) {
         return !new RegExp(like).test(value);
       }
     }
@@ -283,7 +298,6 @@ function normalizeOrder(filter) {
 
   orders.forEach(function(key, i) {
     var reverse = 1;
-    console.log(key);
     var m = key.match(/\s+(A|DE)SC$/i);
     if (m) {
       key = key.replace(/\s+(A|DE)SC/i, '');
