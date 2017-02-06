@@ -2,7 +2,7 @@
 // Node module: loopback-filters
 // This file is licensed under the MIT License.
 // License text available at https://opensource.org/licenses/MIT
-
+'use strict';
 var debug = require('debug')('loopback:filter');
 var geo = require('./lib/geo');
 var remove = require('diacritics').remove;
@@ -60,13 +60,13 @@ function matchesFilter(obj, filter) {
       if (Array.isArray(where[key])) {
         if (key === 'and') {
           pass = where[key].every(function(cond) {
-            return applyFilter({ where: cond })(obj);
+            return applyFilter({where: cond})(obj);
           });
           return pass;
         }
         if (key === 'or') {
           pass = where[key].some(function(cond) {
-            return applyFilter({ where: cond })(obj);
+            return applyFilter({where: cond})(obj);
           });
           return pass;
         }
@@ -147,8 +147,8 @@ function test(example, value) {
     }
 
     if ('between' in example) {
-      return (testInEquality({ gte: example.between[0] }, value) &&
-        testInEquality({ lte: example.between[1] }, value));
+      return (testInEquality({gte: example.between[0]}, value) &&
+        testInEquality({lte: example.between[1]}, value));
     }
 
     if (example.like || example.nlike) {
@@ -306,7 +306,7 @@ function normalizeOrder(filter) {
       var Ctor = SyntaxError || Error;
       throw new Ctor('filter.order must includ ASC of DESC');
     }
-    orders[i] = { 'key': key, 'reverse': reverse };
+    orders[i] = {'key': key, 'reverse': reverse};
   });
 
   return (filter.orders = orders);
